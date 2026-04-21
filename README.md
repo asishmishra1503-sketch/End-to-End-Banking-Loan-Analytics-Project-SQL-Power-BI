@@ -67,3 +67,97 @@ This project demonstrates how financial institutions:
 SQL | MySQL | Power BI | Data Cleaning | Data Modeling | Business Analysis
 
 📌 This project strengthened my ability to turn raw financial data into actionable business insights.
+
+
+
+
+
+
+I have used all this query to retrieve all the data from the source data.
+
+Select * From finance_data;
+Select count(*) from finance_data;
+
+-- 1. Year-wise Loan Amount Stats
+
+SELECT 
+    YEAR(STR_TO_DATE(issue_d, '%d-%m-%Y %H:%i')) AS year, 
+    Concat(ROUND(SUM(loan_amnt) / 1000000, 2), ' M') AS total_loan_amount
+FROM finance_data
+GROUP BY year
+ORDER BY year;
+
+-- 2. Grade and Sub-Grade wise Revolving Balance
+
+Select Grade, Sub_Grade,
+Concat(Round(Sum(revol_bal)/1000000,2), ' M') as Total_Revolve_Balance From Finance_Data
+Group By Grade, Sub_Grade
+Order By Grade, Sub_Grade Desc;
+
+-- 3.Total Payment: Verified vs. Non-Verified
+
+Select verification_status, 
+Concat(Round(Sum(total_pymnt)/1000000,2),' M') as Total_payment
+From Finance_Data
+Where verification_status IN ('Verified' ,'Not Verified')
+Group By verification_status;
+
+-- 4. State-wise and Month-wise Loan Status
+
+SELECT 
+    addr_state AS State,
+    MONTHNAME(STR_TO_DATE(issue_d, '%d-%m-%Y %H:%i')) AS Month_Name, 
+    loan_status, Concat(Round(Sum(loan_amnt)/100000,2), ' M') as Total_Loan_Amount
+FROM finance_data
+GROUP BY 
+    addr_state,
+    MONTHNAME(STR_TO_DATE(issue_d, '%d-%m-%Y %H:%i')), MONTH(STR_TO_DATE(issue_d, '%d-%m-%Y %H:%i')),
+    loan_status
+ORDER BY 
+ MONTH(STR_TO_DATE(issue_d, '%d-%m-%Y %H:%i'));
+ 
+-- 5. Home Ownership vs. Last Payment Date Stats
+
+SELECT 
+    home_ownership,
+    last_pymnt_d AS LastPaymentDate,
+    COUNT(id) AS Borrower_Count,
+    concat(Round(SUM(total_pymnt)/ 1000000, 2), ' M') AS Total_Amount_Paid
+FROM finance_data
+WHERE last_pymnt_d IS NOT NULL
+GROUP BY home_ownership, last_pymnt_d;
+ 
+
+ -- 6. What are the Top 5 Reasons (Purposes) for Loans?
+ -- Banks need to know why people are borrowing to tailor their marketing. Is it for debt consolidation, home improvement, or weddings?
+ 
+ SELECT
+    purpose,
+    COUNT(id) AS Total_Applications,
+   Concat(ROUND(SUM(loan_amnt) / 1000000, 2), ' M') AS Total_Loan_Amount,
+    Concat(Round(AVG(int_rate) * 100,2), ' %') AS Avg_Int_Rate
+FROM finance_data
+GROUP BY purpose
+ORDER BY Total_Applications DESC
+Limit 5 ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
